@@ -1,0 +1,35 @@
+name: Generate Branch on README Update
+
+on:
+  push:
+    branches:
+      - main # Cambia esto a 'master' si esa es tu rama principal
+    paths:
+      - 'README.md' # El pipeline SOLO se activará si este archivo sufre modificaciones
+
+jobs:
+  create-new-branch:
+    runs-on: ubuntu-latest
+    # Es vital dar permisos de escritura para que GitHub Actions pueda crear ramas
+    permissions:
+      contents: write 
+
+    steps: 
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar usuario de Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: 🌱 Crear y pushear nueva rama
+        run: |
+          # Generamos un nombre único para la rama usando el ID de la ejecución actual
+          BRANCH_NAME="readme-update-${{ github.run_id }}"
+          
+          echo "Creando y moviéndose a la rama: $BRANCH_NAME"
+          git checkout -b $BRANCH_NAME
+          
+          echo "Subiendo la nueva rama al repositorio remoto..."
+          git push origin $BRANCH_NAME
